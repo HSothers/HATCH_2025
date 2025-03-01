@@ -23,6 +23,7 @@ library(bslib)
 library(digest)
 library(Rook)
 library(shinythemes)
+library(htmlwidgets)
 ```
 
 
@@ -77,7 +78,26 @@ otp_storage <- reactiveValues(otp = NULL, user = NULL, otp_requested = FALSE)  #
 ```
 
 
+```{r}
+ui <- page_navbar(
+  title = "Worm Hole",
+  sidebar = color_by,
+  nav_spacer(),
+  nav_panel("Home", cards[[1]]),
+  nav_panel("About Us", cards[[2]]),
+  nav_panel("Lab", cards[[3]]),
+  nav_panel("Clinical",cards[[4]]),
+  nav_item(tags$a("Posit", href = "https://posit.co"))
+)
+
+shinyApp(ui, server)
+```
+
+
+
 ```{r loginW2fa}
+
+shiny
 # Define UI
 ui <- fluidPage(
   theme = shinytheme("cerulean"),
@@ -160,12 +180,9 @@ shinyApp(ui = ui, server = server)
 
 ```{r LabAccessCheck}
 
-
-
-
-Access_Bool(user_out,access_level=2)
-
-# Lab_bool
+# ifelse(Access_Bool(user_out,access_level=0)==0,"Page not available - incorrect permissions.")
+# 
+# # Lab_bool
 
 
 ```
