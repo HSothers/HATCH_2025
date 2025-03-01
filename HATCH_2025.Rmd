@@ -3,6 +3,7 @@
 # author: "Genome Guild"
 # date: "2025-03-01"
 output: html_document
+runtime: shiny
 ---
 
 
@@ -41,27 +42,34 @@ library(shinythemes)
 
 ```
 
-```{r}
+
+```{r UsernameDummyCode}
 #user database with hashed passwords
 users <- data.frame(
-  username = c("admin", "user1"),
-  password = c(digest("password123", algo = "sha256"), digest("mypassword", algo = "sha256")),
-  email = c("admin@example.com", "user1@example.com"),  # Emails for sending OTP
+  username = c("admin", "user1","DrPepper"),
+  password = c(digest("password123", algo = "sha256"), digest("mypassword", algo = "sha256"),digest("mypassword", algo = "sha256")),
+  email = c("admin@example.com", "user1@example.com","Fizzy@Sodapop.edu"),  # Emails for sending OTP
+  role = c("Primary_Clinician","Laboratory_Personnel","Secondary_Clinician"),
   stringsAsFactors = FALSE
 )
+
 # Store OTPs (in a real app, use a database or session-based storage)
-otp_storage <- reactiveValues(otp = NULL, user = NULL)
+otp_storage <- reactiveValues(otp = NULL, user = NULL, otp_requested = FALSE)  # Added otp_requested
+
+```
+
+
+```{r loginW2fa}
 # Define UI
 ui <- fluidPage(
-  theme = shinytheme("cerulean"),  # Add a theme for a modern look
-  titlePanel("WormHole Login Page - 2FA Enabled"),
+  theme = shinytheme("cerulean"),
+  titlePanel("WormHole Login Page"),
   sidebarLayout(
     sidebarPanel(
       textInput("username", "Username:", placeholder = "Enter your username"),
       passwordInput("password", "Password:", placeholder = "Enter your password"),
       actionButton("login", "Login", class = "btn-primary"),
-      uiOutput("otp_ui"),  # OTP Input UI (only shown after login step)
-      actionButton("verify_otp", "Verify OTP", class = "btn-success")
+      uiOutput("otp_ui")  # OTP Input UI (only shown after login step)
     ),
     mainPanel(
       br(),  # Adds some spacing
@@ -74,6 +82,9 @@ server <- function(input, output, session) {
   observeEvent(input$login, {
     user <- input$username
     pass <- digest(input$password, algo = "sha256")  # Hash the entered password
+    # Reset OTP UI when a new login attempt is made
+    otp_storage$otp_requested <- FALSE
+    output$otp_ui <- renderUI(NULL)  # Clear previous OTP UI
     # Check if username exists in the database
     if (user %in% users$username) {
       stored_pass <- users$password[users$username == user]
@@ -83,9 +94,10 @@ server <- function(input, output, session) {
         otp_storage$user <- user
         # Simulate sending OTP (for real apps, use an email API)
         email <- users$email[users$username == user]
-        message <- paste("Your OTP is:", otp_storage$otp)
-        # In a real app, send email via SMTP (e.g., mailR, Rook)
         cat("Sending OTP to", email, ":", otp_storage$otp, "\n")
+        # Ensure OTP UI is displayed only once per login
+        otp_storage$otp_requested <- TRUE
+        output$message <- renderText("OTP has been sent to your email. Please enter it below.")
         # Show OTP input field dynamically
         output$otp_ui <- renderUI({
           tagList(
@@ -93,7 +105,6 @@ server <- function(input, output, session) {
             actionButton("verify_otp", "Verify OTP", class = "btn-success")
           )
         })
-        output$message <- renderText("OTP has been sent to your email. Please enter it below.")
       } else {
         output$message <- renderText("Invalid username or password.")
       }
@@ -105,19 +116,38 @@ server <- function(input, output, session) {
     if (!is.null(otp_storage$otp) && input$otp == otp_storage$otp) {
       output$message <- renderText("Welcome to Wormhole! Login successful.")
       otp_storage$otp <- NULL  # Reset OTP after successful login
+      otp_storage$otp_requested <- FALSE  # Reset so OTP UI disappears
+      # Clear OTP UI after successful login
+      output$otp_ui <- renderUI(NULL)
     } else {
       output$message <- renderText("Invalid OTP. Please try again.")
-    }
+      
+      
+ }
   })
+user_out <<- reactive(input$username)
 }
 # Run the application
 shinyApp(ui = ui, server = server)
+
 ```
 
 
 ![Worms](CrawlingCelegans.gif)
 
-## About Us  
+## About Us 
 
-## 
+## Laboratory  
+
+```{r LabAccessCheck}
+# 
+# Lab_bool
+# 
+# Lab_bool
+
+
+```
+
+
+## Clinician  
 
