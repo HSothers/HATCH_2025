@@ -7,12 +7,30 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
 
-library(tidyverse)
 
+
+
+
+library(tidyverse) 
+library(reticulate) #r and python integration
 
 
 ```
+
+
+```{python}
+ #example python chunk 
+ 
+```
+
+
+
+```{r}
+
+```
+
 
 
 
